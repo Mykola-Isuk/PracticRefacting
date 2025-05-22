@@ -1,16 +1,17 @@
-// Отримуємо всі div з класом "table"
-let divTags = document.querySelectorAll("div.table");
-
-// Проходимо через кожен div
-divTags.forEach(div => {
-    // Отримуємо всі таблиці в поточному div
-    div.querySelectorAll("table").forEach(table => {
-        // Отримуємо всі елементи td в таблиці
-        let tdElements = table.querySelectorAll("td");
-
-        // Проходимо через всі td, починаючи з другого, з кроком 2
-        tdElements.forEach((td, index) => {
-            if (index % 2 !== 0) td.classList.add("selected");
-        });
+// Функція, яка додає клас "selected" до кожного другого td
+function highlightOddTds(table) {
+    table.querySelectorAll("td").forEach((td, index) => {
+        if (index % 2 !== 0) td.classList.add("selected");
     });
-});
+}
+
+// Функція, яка обробляє всі таблиці всередині div'ів
+function processTablesInDivs(divs) {
+    divs.forEach(div => {
+        div.querySelectorAll("table").forEach(highlightOddTds);
+    });
+}
+
+// Отримуємо всі div з класом "table" і обробляємо їх
+const divTags = document.querySelectorAll("div.table");
+processTablesInDivs(divTags);
