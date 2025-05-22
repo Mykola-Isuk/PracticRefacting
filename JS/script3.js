@@ -1,4 +1,3 @@
-// Визначення матриці для подальших обчислень
 const matrix = [
   [3, 7, 0, 4, 0],
   [6, -8, 1, -9, 0],
@@ -7,121 +6,69 @@ const matrix = [
   [-35, 12, 9, 0, 4],
 ];
 
-// Виведення матриці для наочності
 console.log("Матриця: ", matrix);
 
-// Обчислення кількості додатних елементів у матриці
-let positiveCount = matrix
-  .map((row) => row.filter((el) => el > 0).length) // Рахуємо кількість додатних елементів у кожному рядку
-  .reduce((sum, el) => sum + el, 0); // Підсумовуємо всі значення
-console.log("Додатні елементи: " + positiveCount);
+// Підрахунок додатних елементів
+const totalPositive = matrix.flat().filter(x => x > 0).length;
+console.log("Додатні елементи: " + totalPositive);
 
-// Підрахунок кількості рядків, які не містять нуля
-let rowsWithoutZeroCount = matrix.filter((row) => !row.includes(0)).length; // Залишаємо тільки ті рядки, в яких немає нулів // Рахуємо кількість таких рядків
+// Рядки без нулів
+const rowsWithoutZeroCount = matrix.filter(row => !row.includes(0)).length;
 console.log("Кількість рядків, які не містять нуль: " + rowsWithoutZeroCount);
 
-// Функція для підрахунку кількості стовпців, що містять хоча б один нуль
+// Кількість стовпців із нулями
 function getColsWithZeroCount(matrix) {
-  return matrix[0].reduce(
-    (count, _, colIndex) =>
-      matrix.some((row) => row[colIndex] === 0) ? count + 1 : count,
-    0
-  );
+  return matrix[0].filter((_, j) => matrix.some(row => row[j] === 0)).length;
+}
+console.log("Кількість стовпців, які містять нуль: " + getColsWithZeroCount(matrix));
+
+// Індекс рядка з найдовшою серією
+function getLongestSeriesLength(row) {
+  let maxLength = 1, current = 1;
+  for (let i = 1; i < row.length; i++) {
+    current = (row[i] === row[i - 1]) ? current + 1 : 1;
+    maxLength = Math.max(maxLength, current);
+  }
+  return maxLength;
 }
 
-console.log(
-  "Кількість стовпців, які містять нуль: " + getColsWithZeroCount(matrix)
-);
-
-// Функція для знаходження індексу рядка з найдовшою серією повторюваних елементів
 function getRowWithLongestSeriesIndex(matrix) {
-  let longestSeries = 1,
-    index = -1;
-
-  matrix.forEach((row, i) => {
-    let currentSeries = row.reduce(
-      (max, el, j) => {
-        if (j > 0 && row[j - 1] === el) {
-          max.series++;
-        } else {
-          if (max.series > max.longest) {
-            max.longest = max.series;
-          }
-          max.series = 1;
-        }
-        return max;
-      },
-      { series: 1, longest: 1 }
-    );
-
-    if (currentSeries.longest > longestSeries) {
-      longestSeries = currentSeries.longest;
-      index = i;
+  let maxSeries = 1;
+  let resultIndex = -1;
+  matrix.forEach((row, index) => {
+    const series = getLongestSeriesLength(row);
+    if (series > maxSeries) {
+      maxSeries = series;
+      resultIndex = index;
     }
   });
-
-  return index;
+  return resultIndex;
 }
 
-let index = getRowWithLongestSeriesIndex(matrix);
-index === -1
-  ? console.log("Серії повторюваних елементів немає")
-  : console.log("Індекс рядка з найдовшою серією: " + index);
-
-// Обчислення добутку елементів у рядках без від'ємних елементів
-let productArrayWithoutNegativeElementsInRows = matrix
-  .filter((row) => row.every((el) => el >= 0)) // Вибираємо рядки без від'ємних значень
-  .map((row) => row.reduce((product, el) => product * el, 1)); // Обчислюємо добуток у рядку
-
+const index = getRowWithLongestSeriesIndex(matrix);
 console.log(
-  "Добуток елементів у рядках без від’ємних елементів: ",
-  productArrayWithoutNegativeElementsInRows
+    index === -1
+        ? "Серії повторюваних елементів немає"
+        : "Індекс рядка з найдовшою серією: " + index
 );
 
-// Функція для видалення стовпців із матриці
-function removeColsFromMatrix(matrix, colsToRemove) {
-  return matrix.map((row) =>
-    row.filter((_, index) => !colsToRemove.includes(index))
-  );
-}
+// Добуток у рядках без від'ємних
+const productArray = matrix
+    .filter(row => row.every(el => el >= 0))
+    .map(row => row.reduce((prod, el) => prod * el, 1));
+console.log("Добуток елементів у рядках без від’ємних елементів: ", productArray);
 
-// Функція для обчислення сум у стовпцях матриці
-function getColSumsInMatrix(matrix) {
-  const sumsArray = [];
-  const rows = matrix.length;
-  const cols = matrix[0].length;
-
-  for (let j = 0; j < cols; j++) {
-    let sum = 0;
-    for (let i = 0; i < rows; i++) {
-      sum += matrix[i][j]; // Додаємо елементи у стовпці
-    }
-    sumsArray.push(sum);
-  }
-  return sumsArray;
-}
-
-// Функція для отримання суми елементів у стовпцях без від'ємних елементів
+// Сума у стовпцях без від’ємних
 function getSumArrayWithoutNegativeElementsInCols(matrix) {
-  const colsToRemove = [];
-  const rows = matrix.length;
   const cols = matrix[0].length;
+  const validCols = [];
 
   for (let j = 0; j < cols; j++) {
-    for (let i = 0; i < rows; i++) {
-      if (matrix[i][j] < 0) {
-        // Якщо знайдений від'ємний елемент, виключаємо стовпець
-        colsToRemove.push(j);
-        break;
-      }
-    }
+    if (matrix.every(row => row[j] >= 0)) validCols.push(j);
   }
 
-  const updatedMatrix = removeColsFromMatrix(matrix, colsToRemove); // Видаляємо стовпці
-  return getColSumsInMatrix(updatedMatrix);
+  return validCols.map(j => matrix.reduce((sum, row) => sum + row[j], 0));
 }
 
-console.log(
-  "Сума елементів у стовпцях без від’ємних елементів: ",
-  getSumArrayWithoutNegativeElementsInCols(matrix)
-);
+console.log("Сума елементів у стовпцях без від’ємних елементів: ",
+    getSumArrayWithoutNegativeElementsInCols(matrix));
